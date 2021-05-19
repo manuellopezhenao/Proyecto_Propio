@@ -14,12 +14,24 @@ int indexbard = 0;
 
 class _HomePageState extends State<HomePage> {
   String categoria = "Personeria";
-  List<Candidate> candidates = [
-    Candidate(id: "1", name: "Manuel", candidate: "Contraloria", votes: 2),
-    Candidate(id: "2", name: "Miguel", candidate: "Contraloria", votes: 3),
-    Candidate(id: "3", name: "Jaime", candidate: "Personeria", votes: 2),
-    Candidate(id: "4", name: "Jorge", candidate: "Consejo", votes: 1),
-  ];
+  List<Candidate> candidates = [];
+
+  @override
+  void initState() {
+    final socketservice = Provider.of<SocketService>(context, listen: false);
+
+    socketservice.socket.on('candidates', (payload) {
+      setState(() {});
+
+      this.candidates = (payload as List)
+          .map((candidate) => Candidate.fromMap(candidate))
+          .toList();
+      print("Holar");
+      setState(() {});
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final socketservice = Provider.of<SocketService>(context);
@@ -45,31 +57,42 @@ class _HomePageState extends State<HomePage> {
       body: ListView.builder(
         itemCount: candidates.length,
         itemBuilder: (BuildContext context, int index) {
-          return _listCandidate(candidates[index], "Consejo");
+          return _listCandidate(candidates[index]);
         },
       ),
     );
   }
 
-  ListTile _listCandidate(Candidate candidate, String nameCandidate) {
-    // print(nameCandidate);
+  ListTile _listCandidate(Candidate candidate) {
+    final socketservice = Provider.of<SocketService>(context, listen: false);
+
     // if (candidate.candidate == nameCandidate) {
     return ListTile(
+      onTap: () {
+        print(candidate.id);
+        socketservice.socket.emit("voute-candidate", {
+          'id': candidate.id,
+        });
+      },
       title: Text(
         candidate.name,
         style: TextStyle(fontSize: 17),
       ),
       leading: CircleAvatar(
-        backgroundColor: (candidate.candidate == "Personeria")
+        backgroundColor: (candidate.postulation == "Personeria")
             ? Colors.blueAccent
-            : (candidate.candidate == "Contraloria")
+            : (candidate.postulation == "Contraloria")
                 ? Colors.red[200]
-                : Colors.greenAccent[100],
-        child: (candidate.candidate == "Personeria")
+                : (candidate.postulation == "Consejo")
+                    ? Colors.greenAccent[100]
+                    : Colors.white,
+        child: (candidate.postulation == "Personeria")
             ? Icon(Icons.person)
-            : (candidate.candidate == "Contraloria")
+            : (candidate.postulation == "Contraloria")
                 ? Icon(Icons.calculate_outlined)
-                : Icon(Icons.people_outline),
+                : (candidate.postulation == "Consejo")
+                    ? Icon(Icons.people_outline)
+                    : Icon(Icons.error),
       ),
       trailing: Text("${candidate.votes}"),
     );

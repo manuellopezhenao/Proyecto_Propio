@@ -1,4 +1,6 @@
 const Candidate = require("./candidate");
+const { v4: uuid_v4 } = require('uuid');
+
 const mysqlConnection = require('../models/database');
 
 class Candidates {
@@ -6,15 +8,11 @@ class Candidates {
         this.candidates = [];
     }
 
-    // addCandidate(candidate = new Candidate()) {
-    //     this.candidates.push(candidate);
-    // }
-
     getCandidate() {
         mysqlConnection.query('SELECT * FROM `Candidates`', (err, rows, fields) => {
             this.candidates = [];
             for (let index = 0; index < rows.length; index++) {
-                this.candidates.push(new Candidate(rows[index].ID, rows[index].name, rows[index].postulation, rows[index].votes));
+                this.candidates.push({ "id": rows[index].ID, "name": rows[index].name, "postulation": rows[index].postulation, "votes": rows[index].votes });
             }
         });
         return this.candidates;
@@ -22,31 +20,30 @@ class Candidates {
 
 
 
-    // addBand(band = new Band()) {
-    //     this.bands.push(band);
-    // }
+    addCandidate(candidate = new Candidate()) {
+        mysqlConnection.query(`INSERT INTO candidates (name, postulation, votes) VALUES ("${candidate.name}", "${candidate.postulation}", "${candidate.votes}")`, (err, rows, fields) => {
+            if (err) {
+                console.log(err);
+            }
+        });
+    }
 
-    // getBands() {
-    //     return this.bands;
-    // }
 
-    // deleteBands(id = '') {
-    //     this.bands = this.bands.filter(band => band.id !== id);
-    //     return this.bands;
-    // }
+    deleteCandidate(id = '') {
+        mysqlConnection.query(`DELETE FROM Candidates WHERE Candidates.ID = ${id}`, (err, rows, fields) => {
+            if (err) {
+                console.log(err);
+            }
+        });
+    }
 
-    // vouteBands(id = '') {
-    //     this.bands = this.bands.map(
-    //         band => {
-    //             if (band.id === id) {
-    //                 band.votes++;
-    //                 return band;
-    //             } else {
-    //                 return band;
-    //             }
-    //         }
-    //     );
-    // }
+    vouteCandidate(id = '') {
+        mysqlConnection.query(`UPDATE Candidates SET votes=votes+1  WHERE ID = ${id}`, (err, rows, fields) => {
+            if (err) {
+                console.log(err);
+            }
+        });
+    }
 }
 
 

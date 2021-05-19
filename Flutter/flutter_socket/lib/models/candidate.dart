@@ -1,14 +1,19 @@
 class Candidate {
-  String id;
+  int id;
   String name;
-  String candidate;
+  String postulation;
   int votes;
 
-  Candidate({this.id, this.name, this.candidate, this.votes});
+  Candidate({this.id, this.name, this.postulation, this.votes});
 
-  factory Candidate.fromMap(Map<String, dynamic> candidate) => Candidate(
-      id: candidate['id'],
-      name: candidate['name'],
-      candidate: candidate['candidate'],
-      votes: candidate['votes']);
+  factory Candidate.fromMap(Map<String, dynamic> candidate) {
+    return Candidate(
+      id: candidate.containsKey('id') ? candidate['id'] : 'no-id',
+      name: candidate.containsKey('name') ? candidate['name'] : 'no-name',
+      postulation: candidate.containsKey('postulation')
+          ? candidate['postulation']
+          : 'no-candidate',
+      votes: candidate.containsKey('votes') ? candidate['votes'] : 'no-vote',
+    );
+  }
 }

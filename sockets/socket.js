@@ -22,19 +22,21 @@ io.on("connection", (client) => {
         console.log("Cliente Desconectado");
     });
 
-    client.on("voute-ban", (payload) => {
-        bands.vouteBands(payload.id);
-        io.emit('candidates', bands.getCandidate());
+    client.on("voute-candidate", (payload) => {
+        candidates.vouteCandidate(payload.id, payload.name, payload.postulation, payload.votes++);
+        io.emit('candidates', candidates.getCandidate());
     });
 
-    client.on("add-ban", (payload) => {
-        const newBand = new Band(payload.name);
-        bands.addBand(newBand);
-        io.emit('candidates', bands.getCandidate());
+    client.on("add-candidate", (payload) => {
+        const newCandidate = new Candidate(payload.name, payload.postulation);
+        console.log(newCandidate);
+        candidates.addCandidate(newCandidate);
+        io.emit('candidates', candidates.getCandidate());
     });
 
-    client.on("delete-ban", (payload) => {
-        bands.deleteBands(payload.id);
-        io.emit('candidates', bands.getCandidate());
+    client.on("delete-candidate", (payload) => {
+        console.log(payload);
+        candidates.deleteCandidate(payload.id);
+        io.emit('candidates', candidates.getCandidate());
     });
 });
