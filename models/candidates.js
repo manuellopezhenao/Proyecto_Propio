@@ -1,5 +1,7 @@
 const Candidate = require("./candidate");
 const { v4: uuid_v4 } = require('uuid');
+const { io } = require("../index");
+
 
 const mysqlConnection = require('../models/database');
 
@@ -24,6 +26,16 @@ class Candidates {
         mysqlConnection.query(`INSERT INTO candidates (name, postulation, votes) VALUES ("${candidate.name}", "${candidate.postulation}", "${candidate.votes}")`, (err, rows, fields) => {
             if (err) {
                 console.log(err);
+            } else {
+                mysqlConnection.query('SELECT * FROM `Candidates`', (err, rows, fields) => {
+                    this.candidates = [];
+                    for (let index = 0; index < rows.length; index++) {
+                        this.candidates.push({ "id": rows[index].ID, "name": rows[index].name, "postulation": rows[index].postulation, "votes": rows[index].votes });
+                    }
+
+                    io.emit('candidates', this.candidates);
+
+                });
             }
         });
     }
@@ -32,17 +44,45 @@ class Candidates {
     deleteCandidate(id = '') {
         mysqlConnection.query(`DELETE FROM Candidates WHERE Candidates.ID = ${id}`, (err, rows, fields) => {
             if (err) {
+
                 console.log(err);
+
+
+            } else {
+                mysqlConnection.query('SELECT * FROM `Candidates`', (err, rows, fields) => {
+                    this.candidates = [];
+                    for (let index = 0; index < rows.length; index++) {
+                        this.candidates.push({ "id": rows[index].ID, "name": rows[index].name, "postulation": rows[index].postulation, "votes": rows[index].votes });
+                    }
+
+                    io.emit('candidates', this.candidates);
+
+                });
             }
         });
     }
 
-    vouteCandidate(id = '') {
-        mysqlConnection.query(`UPDATE Candidates SET votes=votes+1  WHERE ID = ${id}`, (err, rows, fields) => {
-            if (err) {
+    async vouteCandidate(id = '') {
+
+        await mysqlConnection.awaitQuery(`UPDATE Candidates SET votes=votes+1  WHERE ID = ${id}`, (err, rows, fields) => {
+
+            if (!err) {
+                mysqlConnection.query('SELECT * FROM `Candidates`', (err, rows, fields) => {
+                    this.candidates = [];
+                    for (let index = 0; index < rows.length; index++) {
+                        this.candidates.push({ "id": rows[index].ID, "name": rows[index].name, "postulation": rows[index].postulation, "votes": rows[index].votes });
+                    }
+
+                    io.emit('candidates', this.candidates);
+
+                });
+            } else {
                 console.log(err);
+
             }
         });
+
+
     }
 }
 
