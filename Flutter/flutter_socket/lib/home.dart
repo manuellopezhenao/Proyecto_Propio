@@ -54,12 +54,14 @@ class _HomePageState extends State<HomePage> {
         ],
         title: Text('Votación'),
       ),
-      body: ListView.builder(
-        itemCount: candidates.length,
-        itemBuilder: (BuildContext context, int index) {
-          return _listCandidate(candidates[index]);
-        },
-      ),
+      body: (socketservice.serverStatus == ServerStatus.Online)
+          ? ListView.builder(
+              itemCount: candidates.length,
+              itemBuilder: (BuildContext context, int index) {
+                return _listCandidate(candidates[index]);
+              },
+            )
+          : Center(child: CircularProgressIndicator()),
     );
   }
 

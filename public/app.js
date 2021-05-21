@@ -9,9 +9,15 @@ socket.on("disconnet", function() {
 });
 
 
+let index = 0;
+var myChart;
+
+
+
+
 socket.on("candidates", function(payload) {
 
-    console.log(payload);
+    // console.log(payload);
 
     let table = document.querySelector("table");
 
@@ -21,18 +27,92 @@ socket.on("candidates", function(payload) {
     let data = Object.keys(payload[0]);
     generateTableHead(table, data);
     generateTable(table, payload);
+    let ctx = document.getElementById('myChart').getContext('2d');
+
+    let datos = [];
+    let valores = [];
+    let colores = [];
+
+
+    for (const iterator of payload) {
+        datos.push(iterator.name);
+        valores.push(iterator.votes);
+        colores.push(getColoresPastel());
+    }
+    if (index == 0) {
+
+        myChart = generarGrafica(ctx, "pie", datos, colores, valores);
+    }
+    if (index == 1) {
+
+        console.log(datos);
+
+        myChart.destroy();
+        myChart = generarGrafica(ctx, "pie", datos, colores, valores);
+    }
+
+    index = 1;
+
+
+    // function getColoresVivos() {
+    //     var letters = '0123456789ABCDEF'.split('');
+    //     var color = '#';
+    //     for (var i = 0; i < 6; i++) {
+    //         color += letters[Math.floor(Math.random() * 16)];
+    //     }
+    //     console.log(color);
+    //     return color;
+    // }
+
+    function getColoresPastel() {
+        return "hsl(" + 360 * Math.random() + ',' +
+            (25 + 70 * Math.random()) + '%,' +
+            (85 + 10 * Math.random()) + '%)'
+    }
+
+
 
 });
 
 const AddCandidateButton = document.getElementById("add");
-const AddCandidateButton2 = document.getElementById("add2");
+const ButtonLine = document.getElementById("lineas");
 const AddCandidateInput = document.querySelector(".form-control");
-const candidateList = document.querySelector(".todo-list");
 let idPrueba = 0;
 
 const dropdownInput = document.getElementById("asdaf");
 AddCandidateButton.addEventListener("click", addCadidate);
-AddCandidateButton2.addEventListener("click", addCadidate2);
+
+
+function generarGrafica(ctx, estilo, datos, colores, valores) {
+    return new Chart(ctx, {
+        type: estilo,
+        data: {
+            labels: datos,
+            datasets: [{
+                label: "1",
+                data: valores,
+                backgroundColor: colores,
+
+                borderWidth: 0.1
+            }]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Resultado De Votaciones'
+                }
+            }
+        },
+    });
+}
 
 function addCadidate(event) {
     event.preventDefault();
@@ -50,20 +130,12 @@ function addCadidate(event) {
 
 
 
-function deleteCandidate(idCandidate) {
 
+
+function deleteCandidate(idCandidate) {
     socket.emit("delete-candidate", {
         id: idCandidate
     });
-
-}
-
-function addCadidate2(params) {
-    params.preventDefault();
-
-
-
-
 }
 
 function generateTableHead(table, data) {
@@ -102,18 +174,8 @@ function generateTable(table, data) {
         button.innerHTML = '<i class="fas fa-trash"></i>';
         cell.appendChild(button);
         index++;
-        // console.log(element.id);
     }
     index = 0;
 
-    // let button2 = document.getElementById("2");
-    //evento click
-    // console.log(button2);
-
-    // button.addEventListener("click", prueba); //evento click
 
 }
-
-// let table = document.querySelector("table");
-// let data = Object.keys(mountains[0]);
-// generateTableHead(table, data);
