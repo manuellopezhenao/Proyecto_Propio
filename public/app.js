@@ -12,15 +12,16 @@ socket.on("disconnet", function() {
 let index = 0;
 var myChart;
 
+const AddCandidateButton = document.getElementById("add");
+const ButtonLine = document.getElementById("lineas");
+const AddCandidateInput = document.querySelector(".form-control");
 
+const dropdownInput = document.getElementById("postulacion");
+AddCandidateButton.addEventListener("click", addCadidate);
 
 
 socket.on("candidates", function(payload) {
-
-    // console.log(payload);
-
     let table = document.querySelector("table");
-
     while (table.firstChild) {
         table.removeChild(table.firstChild);
     }
@@ -28,12 +29,9 @@ socket.on("candidates", function(payload) {
     generateTableHead(table, data);
     generateTable(table, payload);
     let ctx = document.getElementById('myChart').getContext('2d');
-
     let datos = [];
     let valores = [];
     let colores = [];
-
-
     for (const iterator of payload) {
         datos.push(iterator.name);
         valores.push(iterator.votes);
@@ -53,34 +51,14 @@ socket.on("candidates", function(payload) {
 
     index = 1;
 
-
-    // function getColoresVivos() {
-    //     var letters = '0123456789ABCDEF'.split('');
-    //     var color = '#';
-    //     for (var i = 0; i < 6; i++) {
-    //         color += letters[Math.floor(Math.random() * 16)];
-    //     }
-    //     console.log(color);
-    //     return color;
-    // }
-
     function getColoresPastel() {
         return "hsl(" + 360 * Math.random() + ',' +
             (25 + 70 * Math.random()) + '%,' +
             (85 + 10 * Math.random()) + '%)'
     }
-
-
-
 });
 
-const AddCandidateButton = document.getElementById("add");
-const ButtonLine = document.getElementById("lineas");
-const AddCandidateInput = document.querySelector(".form-control");
-let idPrueba = 0;
 
-const dropdownInput = document.getElementById("asdaf");
-AddCandidateButton.addEventListener("click", addCadidate);
 
 
 function generarGrafica(ctx, estilo, datos, colores, valores) {
@@ -128,10 +106,6 @@ function addCadidate(event) {
     }
 }
 
-
-
-
-
 function deleteCandidate(idCandidate) {
     socket.emit("delete-candidate", {
         id: idCandidate
@@ -176,6 +150,5 @@ function generateTable(table, data) {
         index++;
     }
     index = 0;
-
 
 }
